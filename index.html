@@ -1,13 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chelsea3D</title>
+    <title>Plotting a 3D function on a HTML Canvas</title>
+    <meta name="description"
+        content="Experimental 3D function plotter, using HTML5 and plain JavaScript, without the use of libraries." />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css" type="text/css" media="screen" />
 </head>
+
 <body>
-    <canvas id="canvas"></canvas>
-    <script src="./script.js"></script>
+    <noscript>JavaScript is disabled</noscript>
+    <h1>Sidus 3D Test</h1>
+    <div id="container">
+        <canvas id="myCanvas">
+            HTML5 Canvas not supported
+        </canvas>
+    </div>
+    <script src="main.js"></script>
+    <script>
+        function draw(){
+            var elems=[];
+            var p1 = new Point({color:'red',size:10},0,0,0);
+            var p2 = new Point({color:'blue',size:10},1,1,1);
+            var p3 = new Point({color:'green',size:10},2,2,2);
+            var p4 = new Point({color:'yellow',size:10},3,3,3);
+            var p5 = new Point({color:'orange',size:10},4,4,4);
+
+            var l1 = new Line({color:'red',size:10},0,0,0,1,1,1);
+
+            var ax_x = new Line({strokeColor:'red',size:10},0,0,0,10,0,0);
+            var ax_y = new Line({strokeColor:'green',size:10},0,0,0,0,10,0);
+            var ax_z = new Line({strokeColor:'blue',size:10},0,0,0,0,0,10);
+
+            for(i=0;i<3;i++){
+                for(j=0;j<3;j++){
+                    for(k=0;k<3;k++){
+                        var p = new Point({color:'red',size:10},i,j,k);
+                    }
+                }
+            }
+            //draw a with lines
+            
+            render();
+
+        }
+        draw();
+    </script>
 </body>
+
 </html>
