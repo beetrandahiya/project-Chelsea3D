@@ -182,7 +182,7 @@ var ctx = canvas.getContext('2d');
 ctx.translate(canvas.width / 2, canvas.height / 2);
 
 //set initial rotation
-var rotX = 0 * Math.PI/180; //rotation around x-axis
+var rotX = 10 * Math.PI/180; //rotation around x-axis
 var rotY = 0 * Math.PI/180; //rotation around y-axis
 var rotZ = 0; //rotation around z-axis
 
@@ -220,11 +220,10 @@ canvas.addEventListener('touchmove', handleMousemove, false);
 
 
 function handleMousedown(e) {
-    if (!mouseDown) {
-        mouseDown = true;
-    }
-    var x = parseInt(e.clientX) || parseInt(e.touches[0].clientX);
-    var y = parseInt(e.clientY) || parseInt(e.touches[0].clientY);
+    if (!mouseDown) mouseDown = true;
+    canvas.style.cursor = "grabbing";
+    var x = parseInt(e.pageX) || parseInt(e.changedTouches[0].pageX);
+    var y = parseInt(e.pageY) || parseInt(e.changedTouches[0].pageY);
 
     mouseX = x;
     mouseY = y;
@@ -232,57 +231,25 @@ function handleMousedown(e) {
 }
 
 function handleMousemove(e) {
-    var sens = 10;
+    var sens = 1000;
     pmouseX = mouseX;
     pmouseY = mouseY;
-    var x = parseInt(e.pageX) || parseInt(e.touches[0].clientX);
-    var y = parseInt(e.pageY) || parseInt(e.touches[0].clientY);
-    if (Math.abs(x - pmouseX) >= 1) {
-        mouseX = x;
-    } else {
-        mouseX = pmouseX;
-    }
-    if (Math.abs(y - pmouseY) >= 1) {
-        mouseY = y;
-    } else {
-        mouseY = pmouseY;
-    }
+    var x = parseInt(e.pageX) || parseInt(e.changedTouches[0].pageX);
+    var y = parseInt(e.pageY) || parseInt(e.changedTouches[0].pageY);
+    if (Math.abs(x - pmouseX) >= 0.1) {mouseX = x;} else {mouseX = pmouseX;}
+    if (Math.abs(y - pmouseY) >= 0.1) {mouseY = y;} else {mouseY = pmouseY;}
 
     //change rotation
     if (mouseDown===true) {
-        rotX += (mouseY - pmouseY) / 10000;
-        rotY += (mouseX - pmouseX) / 10000;
+        console.log(mouseX, pmouseX);
+        console.log(rotX, rotY,rotZ);
+        rotX = rotX - (mouseY - pmouseY) / sens;
+        rotY = rotY - (mouseX - pmouseX) / sens;
+        console.log(rotX, rotY,rotZ);
         render();
     }
     e.preventDefault();
 }
-
-//set up event listeners for arrow keys
-document.addEventListener('keydown', function (e) {
-    var sens = 10;
-    if (e.keyCode == 37) {
-        //left arrow
-        rotY -= 0.1/sens;
-        render();
-    } else if (e.keyCode == 38) {
-        //up arrow
-        rotX += 0.1/sens;
-        render();
-    } else if (e.keyCode == 39) {
-        //right arrow
-        rotY += 0.1/sens;
-        render();
-    } else if (e.keyCode == 40) {
-        //down arrow
-        rotX -= 0.1/sens;
-        render();
-    }
-
-}, false);
-
-
-
-
 
 
 
@@ -310,7 +277,9 @@ function render() {
     for (var i = 0; i < ELEMENTS.length; i++) {
         //rotate the nodes
         for (var j = 0; j < ELEMENTS[i].nodes.length; j++) {
-            //console.log(rotX, rotY, rotZ);
+          //  console.log(rotX, rotY, rotZ);
+           // console.log(ELEMENTS[i].nodes[j]);
+            
             rotateX(ELEMENTS[i].nodes[j], rotX);
             rotateY(ELEMENTS[i].nodes[j], rotY);
             rotateZ(ELEMENTS[i].nodes[j], rotZ);
@@ -322,11 +291,6 @@ function render() {
     var t1 = performance.now();
     console.log("Render took " + (t1 - t0) + " milliseconds.")
 }
-
-
-
-//render
-render();
 
 
 
