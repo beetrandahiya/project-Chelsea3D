@@ -14,31 +14,43 @@
 
 //functions for orthographic projection
 
-function rotateX(NODE, theta) {
+function rotateX(theta) {
     var sinTheta = Math.sin(-theta);
     var cosTheta = Math.cos(-theta);
-    var y = NODE.y;
-    var z = NODE.z;
-    NODE.y = y * cosTheta - z * sinTheta;
-    NODE.z = z * cosTheta + y * sinTheta;
+    for(var i=0; i<ELEMENTS.length; i++){
+        for(var j=0; j<ELEMENTS[i].nodes.length; j++){
+            var y = ELEMENTS[i].nodes[j].y;
+            var z = ELEMENTS[i].nodes[j].z;
+            ELEMENTS[i].nodes[j].y = y * cosTheta - z * sinTheta;
+            ELEMENTS[i].nodes[j].z = z * cosTheta + y * sinTheta;
+        }
+    }
 }
 
-function rotateY(NODE, theta) {
+function rotateY(theta) {
     var sinTheta = Math.sin(-theta);
     var cosTheta = Math.cos(-theta);
-    var x = NODE.x;
-    var z = NODE.z;
-    NODE.x = x * cosTheta - z * sinTheta;
-    NODE.z = z * cosTheta + x * sinTheta;
+    for(var i=0; i<ELEMENTS.length; i++){
+        for(var j=0; j<ELEMENTS[i].nodes.length; j++){
+            var x = ELEMENTS[i].nodes[j].x;
+            var z = ELEMENTS[i].nodes[j].z;
+            ELEMENTS[i].nodes[j].x = x * cosTheta - z * sinTheta;
+            ELEMENTS[i].nodes[j].z = z * cosTheta + x * sinTheta;
+        }
+    }
 }
 
-function rotateZ(NODE, theta) {
+function rotateZ(theta) {
     var sinTheta = Math.sin(theta);
     var cosTheta = Math.cos(theta);
-    var x = NODE.x;
-    var y = NODE.y;
-    NODE.x = x * cosTheta - y * sinTheta;
-    NODE.y = y * cosTheta + x * sinTheta;
+    for(var i=0; i<ELEMENTS.length; i++){
+        for(var j=0; j<ELEMENTS[i].nodes.length; j++){
+            var x = ELEMENTS[i].nodes[j].x;
+            var y = ELEMENTS[i].nodes[j].y;
+            ELEMENTS[i].nodes[j].x = x * cosTheta - y * sinTheta;
+            ELEMENTS[i].nodes[j].y = y * cosTheta + x * sinTheta;
+        }
+    }
 }
 
 
@@ -242,6 +254,7 @@ function handleMousemove(e) {
     //change rotation
     if (mouseDown===true) {
         console.log(mouseX, pmouseX);
+        console.log(mouseY, pmouseY);
         console.log(rotX, rotY,rotZ);
         rotX = rotX - (mouseY - pmouseY) / sens;
         rotY = rotY - (mouseX - pmouseX) / sens;
@@ -273,20 +286,16 @@ function render() {
     //clear canvas
     ctx.clearRect(-canvas.width, -canvas.height, 2 * canvas.width, 2 * canvas.height);
 
-  
+    //rotate the elements
+    rotateX(rotX);
+    rotateY(rotY);
+    rotateZ(rotZ);
+
+    //draw the elements
     for (var i = 0; i < ELEMENTS.length; i++) {
-        //rotate the nodes
-        for (var j = 0; j < ELEMENTS[i].nodes.length; j++) {
-          //  console.log(rotX, rotY, rotZ);
-           // console.log(ELEMENTS[i].nodes[j]);
-            
-            rotateX(ELEMENTS[i].nodes[j], rotX);
-            rotateY(ELEMENTS[i].nodes[j], rotY);
-            rotateZ(ELEMENTS[i].nodes[j], rotZ);
-        }
-        //draw the element
         ELEMENTS[i].draw(scale);
     }
+
     //end performance timer
     var t1 = performance.now();
     console.log("Render took " + (t1 - t0) + " milliseconds.")

@@ -3,43 +3,22 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Plotting a 3D function on a HTML Canvas</title>
+    <title>Chelsea3D Test</title>
     <meta name="description"
         content="Experimental 3D function plotter, using HTML5 and plain JavaScript, without the use of libraries." />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css" type="text/css" media="screen" />
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
 </head>
 
 <body>
     <noscript>JavaScript is disabled</noscript>
     <h1>Sidus 3D Test</h1>
     <div id="container">
-        <canvas id="myCanvas">
-            HTML5 Canvas not supported
-        </canvas>
     </div>
-    <script src="main.js"></script>
-    <script>
-        function draw(){
-            var elems=[];
-            
-            var ax_x = new Line({strokeColor:'red',size:10},0,0,0,10,0,0);
-            var ax_y = new Line({strokeColor:'green',size:10},0,0,0,0,10,0);
-            var ax_z = new Line({strokeColor:'blue',size:10},0,0,0,0,0,10);
-
-            for(i=0;i<2;i++){
-                for(j=0;j<2;j++){
-                        var p = new Point({color:'red',size:10},i,j,0);
-                    
-                }
-            }
-            //draw a with lines
-            
-            render();
-
-        }
-        draw();
-    </script>
+    <script src="https://cdn.jsdelivr.net/gh/beetrandahiya/ChelseaJS@db4b6d42f1af1cc1e913bb6c4309da28cb70adcb/main.min.js"></script>
+    <script src="mainchelsea.js"></script>
+ 
 </body>
 
 </html>

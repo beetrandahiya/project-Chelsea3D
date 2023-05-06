@@ -1,5 +1,127 @@
 "use strict";
 
+
+
+//////////////////////////////
+
+var ELEMENTS = [];
+
+// make a class for the nodes
+class Node {
+    constructor(x, y, z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+}
+
+
+
+// make a point element
+class Point {
+    constructor(props, x, y, z) {
+        //set default properties
+        this.props = {
+            color: 'black',
+            size: 1,
+            fill: true,
+            stroke: true,
+            strokeColor: 'black',
+            strokeWidth: 1,
+            opacity: 1
+        };
+        //set properties from props
+        for (var p in props) {
+            this.props[p] = props[p];
+        }
+        this.nodes = [];
+        this.nodes.push(new Node(x, y, z));
+        ELEMENTS.push(this);
+    }
+    draw(scale) {
+        var node = this.nodes[0];
+        var x = node.x * scale;
+        var y = node.y * scale;
+        var z = node.z;
+        var size = this.props.size;
+        var color = this.props.color;
+        var fill = this.props.fill;
+        var stroke = this.props.stroke;
+        var strokeColor = this.props.strokeColor;
+        var strokeWidth = this.props.strokeWidth;
+        var opacity = this.props.opacity;
+        cxt.beginPath();
+        cxt.arc(x, y, size, 0, 2 * Math.PI);
+        cxt.closePath();
+        if (fill) {
+            cxt.fillStyle = color;
+            cxt.globalAlpha = opacity;
+            cxt.fill();
+        }
+        if (stroke) {
+            cxt.strokeStyle = strokeColor;
+            cxt.lineWidth = strokeWidth;
+            cxt.globalAlpha = opacity;
+            cxt.stroke();
+        }
+    }
+}
+
+// make a line element
+class Line {
+    constructor(props, x1, y1, z1, x2, y2, z2) {
+        //set default properties
+        this.props = {
+            color: 'black',
+            size: 1,
+            fill: true,
+            stroke: true,
+            strokeColor: 'black',
+            strokeWidth: 1,
+            opacity: 1
+        };
+        //set properties from props
+        for (var p in props) {
+            this.props[p] = props[p];
+        }
+        this.nodes = [];
+        this.nodes.push(new Node(x1, y1, z1));
+        this.nodes.push(new Node(x2, y2, z2));
+        ELEMENTS.push(this);
+    }
+    draw(scale) {
+        var node1 = this.nodes[0];
+        var node2 = this.nodes[1];
+        var x1 = node1.x * scale;
+        var y1 = node1.y * scale;
+        var z1 = node1.z;
+        var x2 = node2.x * scale;
+        var y2 = node2.y * scale;
+        var z2 = node2.z;
+        var color = this.props.color;
+        var fill = this.props.fill;
+        var stroke = this.props.stroke;
+        var strokeColor = this.props.strokeColor;
+        var strokeWidth = this.props.strokeWidth;
+        var opacity = this.props.opacity;
+        cxt.beginPath();
+        cxt.moveTo(x1, y1);
+        cxt.lineTo(x2, y2);
+        cxt.closePath();
+        if (fill) {
+            cxt.fillStyle = color;
+            cxt.globalAlpha = opacity;
+            cxt.fill();
+        }
+        if (stroke) {
+            cxt.strokeStyle = strokeColor;
+            cxt.lineWidth = strokeWidth;
+            cxt.globalAlpha = opacity;
+            cxt.stroke();
+        }
+    }
+}
+/////////////////////////////
 // "pixel" dimensions 
 var pixelWidth = 2;
 var scale = 50; // a scale factor
@@ -107,13 +229,18 @@ function sizeCanvas() {
 	cxt.translate(canvas.width/2, canvas.height/2);	
 };	
 
+
+
+
+
+
 function drawFunction() {
 
     //start performance timer
     var t0 = performance.now();
 
 	cxt.clearRect(-canvas.width, -canvas.height, 2*canvas.width, 2*canvas.height);
-
+/*
     function fx(t){
         return 2*Math.sin(t)
     }
@@ -132,60 +259,30 @@ function drawFunction() {
         ++i;
     }
     
-	nodesAxes[0] = {x:0, y:0, z:-z_d};
-	nodesAxes[1] = {x:xMax, y:0, z:-z_d};
-	nodesAxes[2] = {x:0, y:yMax, z:-z_d};
-	nodesAxes[3] = {x:0, y:0, z:xMax-z_d};
-	
+	*/
 	// rotate nodes
-	rotateX3D(rotx);	
-	rotateY3D(roty);
-	rotateZ3D(rotz);
+    var p1 = new Point({color: 'red', size: 5}, 1, 0, 0);
+    var p2 = new Point({color: 'blue', size: 5}, 0, 1, 0);
+    var p3 = new Point({color: 'green', size: 5}, 0, 0, 1);
+
+    var ax_x = new Line({strokeColor: 'red', size: 5}, 0, 0, 0, 5, 0, 0);
+    var ax_y = new Line({strokeColor: 'blue', size: 5}, 0, 0, 0, 0, 5, 0);
+    var ax_z = new Line({strokeColor: 'green', size: 5}, 0, 0, 0, 0, 0, 5);
+
+    for (var i = 0; i < ELEMENTS.length; i++) {
+        for (var j = 0; j < ELEMENTS[i].nodes.length; j++) {
+            rotateX3D(ELEMENTS[i].nodes[j], rotx);
+            rotateY3D(ELEMENTS[i].nodes[j], roty);
+            rotateZ3D(ELEMENTS[i].nodes[j], rotz);
+        }
+        ELEMENTS[i].draw(scale);
+    }
+	
     //zoom3D(scale);
 	
 
-    // draw axes
-	cxt.strokeStyle = "black";
-    cxt.lineWidth = 1;
-    cxt.font = 'normal 14px Inter';
-	cxt.beginPath();
-	cxt.moveTo(nodesAxes[0].x*scale,nodesAxes[0].y*scale);
-	cxt.lineTo(nodesAxes[1].x*scale,nodesAxes[1].y*scale);
-	cxt.stroke();      
-    cxt.fillText('x',nodesAxes[1].x*scale,nodesAxes[1].y*scale);	
-	cxt.beginPath();
-	cxt.moveTo(nodesAxes[0].x*scale,nodesAxes[0].y*scale);
-	cxt.lineTo(nodesAxes[2].x*scale,nodesAxes[2].y*scale);
-	cxt.stroke();
-    cxt.fillText('y',nodesAxes[2].x*scale,nodesAxes[2].y*scale);		
-	cxt.beginPath();
-	cxt.moveTo(nodesAxes[0].x*scale,nodesAxes[0].y*scale);
-	cxt.lineTo(nodesAxes[3].x*scale,nodesAxes[3].y*scale);
-	cxt.stroke();
-    cxt.fillText('z',nodesAxes[3].x*scale,nodesAxes[3].y*scale);	
 
 
-
-    
-	// draw figure
-	
-	for (var i=0; i < nodes.length; i++) {
-        cxt.beginPath();
-		cxt.strokeStyle = `hsl(${i/nodes.length*360}, 100%, 50%)`
-        cxt.lineWidth = 4;
-		var px = nodes[i].x;
-		var py = nodes[i].y;
-
-		//cxt.fillRect(px*scale,py*scale,pixelWidth,pixelWidth)
-
-        cxt.lineTo(px*scale,py*scale);
-        if(i<nodes.length-1){
-            var px2 = nodes[i+1].x;
-        var py2 = nodes[i+1].y;
-        cxt.lineTo(px2*scale,py2*scale);
-        }
-        cxt.stroke();
-	}
 
     //end performance timer
     var t1 = performance.now();
@@ -194,66 +291,38 @@ function drawFunction() {
 };
 
 // Rotate shape around the z-axis, i.e. the non-rotated axis, perpendicular to the screen.
-function rotateZ3D(theta) {
+function rotateZ3D(node,theta) {
     var sinTheta = Math.sin(theta);
     var cosTheta = Math.cos(theta);
-    
-    for (var n=0; n<nodes.length; n++) {
-        var node = nodes[n];
         var x = node.x;
         var y = node.y;
         node.x = x * cosTheta - y * sinTheta;
         node.y = y * cosTheta + x * sinTheta;
-    }
-    for (n=0; n<nodesAxes.length; n++) {
-        node = nodesAxes[n];
-        x = node.x;
-        y = node.y;
-        node.x = x * cosTheta - y * sinTheta;
-        node.y = y * cosTheta + x * sinTheta;
-    }	
+    
 };
 
 // Rotate shape around the y-axis, i.e. the non-rotated axis, vertical to the screen.
-function rotateY3D(theta) {
+function rotateY3D(node,theta) {
     var sinTheta = Math.sin(-theta);
     var cosTheta = Math.cos(-theta);
     
-    for (var n=0; n<nodes.length; n++) {
-        var node = nodes[n];
         var x = node.x;
         var z = node.z;
         node.x = x * cosTheta - z * sinTheta;
         node.z = z * cosTheta + x * sinTheta;
-    }
-    for (n=0; n<nodesAxes.length; n++) {
-        node = nodesAxes[n];
-        x = node.x;
-        z = node.z;
-        node.x = x * cosTheta - z * sinTheta;
-        node.z = z * cosTheta + x * sinTheta;
-    }	
+  
 };
 
 // Rotate shape around the x-axis, i.e. the non-rotated axis, horizontal to the screen.
-function rotateX3D(theta) {
+function rotateX3D(node,theta) {
     var sinTheta = Math.sin(-theta);
     var cosTheta = Math.cos(-theta);
     
-    for (var n=0; n<nodes.length; n++) {
-        var node = nodes[n];
         var y = node.y;
         var z = node.z;
         node.y = y * cosTheta - z * sinTheta;
         node.z = z * cosTheta + y * sinTheta;
-    }
-    for (n=0; n<nodesAxes.length; n++) {
-        node = nodesAxes[n];
-        y = node.y;
-        z = node.z;
-        node.y = y * cosTheta - z * sinTheta;
-        node.z = z * cosTheta + y * sinTheta;
-    }	
+    
 };
 
 

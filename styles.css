@@ -8,8 +8,8 @@ h1{
     color: #555;
 }
 #container {
-    width: 60%;
-    height: 600px;
+    width: 500px;
+    height: 500px;
     border: 1px solid #ddd;
     margin: auto;
     border-radius: 8px;
