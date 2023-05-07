@@ -22,12 +22,11 @@ function draw() {
         new line3D(i*10,-100,0,i*10,100,0,"#2224",1);
         new line3D(-100,i*10,0,100,i*10,0,"#2224",1);
     }
-    //make a helix
-    for(var i=-10;i<t;i+=0.1){
-        new line3D(i*10,Math.sin(i)*50,Math.cos(i)*50,(i+0.1)*10,Math.sin(i+0.1)*50,Math.cos(i+0.1)*50,"#f3f",5,"round");
-    }
+    //make a circle
+    var c1=new circle3D(0,0,0,50,64,"#f0f",3,"#f0f3");
+    c1.rotate(0,t,0);
 
-    //t+=0.1;
+    t+=0.01;
     requestAnimationFrame(draw); //calls the function again to update the canavs every screen refresh
 };
 draw();

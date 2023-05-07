@@ -20,7 +20,6 @@ function rotater(angleX,angleY,angleZ,x,y,z){
         [Math.sin(angleZ), Math.cos(angleZ), 0],
         [0, 0, 1]
     ], [x, y, z])
-    console.log(rot)
     return rot;
 }
 
@@ -55,10 +54,85 @@ class line3D {
         this.linecap = linecap;
         this.dasharray = dasharray;
 
-        var rot1 = rotater(tx,ty,tz,x1*scale,y1*scale,z1*scale);
-        var rot2 = rotater(tx,ty,tz,x2*scale,y2*scale,z2*scale);
+        this.rot1 = rotater(tx,ty,tz,x1*scale,y1*scale,z1*scale);
+        this.rot2 = rotater(tx,ty,tz,x2*scale,y2*scale,z2*scale);
 
-        new line(WIDTH/2+rot1[0],HEIGHT/2+rot1[1],WIDTH/2+rot2[0],HEIGHT/2+rot2[1],stroke,stroke_width,linecap,dasharray);
+        this.line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        this.line.setAttributeNS(null, "x1", WIDTH/2+this.rot1[0]);
+        this.line.setAttributeNS(null, "y1", HEIGHT/2+this.rot1[1]);
+        this.line.setAttributeNS(null, "x2", WIDTH/2+this.rot2[0]);
+        this.line.setAttributeNS(null, "y2", HEIGHT/2+this.rot2[1]);
+        this.line.setAttributeNS(null, "stroke", this.stroke);
+        this.line.setAttributeNS(null, "stroke-width", this.stroke_width);
+        this.line.setAttributeNS(null, "stroke-dasharray", this.dasharray);
+        this.line.setAttributeNS(null, "stroke-linecap", this.linecap);
+        svg.appendChild(this.line);
+        return this;    
+    }
+}
+
+// make a circle element
+class circle3D {
+    constructor(x, y, z, r, n, stroke, stroke_width, fill) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.r = r;
+        this.n = n;
+        this.stroke = stroke;
+        this.stroke_width = stroke_width;
+        this.fill = fill;
+        
+        //get the 4 points of the circle
+        this.points = [];
+        for(var i=0;i<=360;i+=360/this.n){
+            var x = r*Math.cos(i*Math.PI/180);
+            var y = r*Math.sin(i*Math.PI/180);
+            var z= this.z;
+            var rot = rotater(tx,ty,tz,x*scale,y*scale,z*scale);
+            this.points.push([WIDTH/2+rot[0],HEIGHT/2+rot[1]]);
+        }
+        this.polygon = document.createElementNS("http://www.w3.org/2000/svg","path");
+        this.polygon.setAttributeNS(null, "d",this.pathd());    
+        this.polygon.setAttributeNS(null, "stroke", this.stroke);
+        this.polygon.setAttributeNS(null,"stroke-width",this.stroke_width);
+        this.polygon.setAttributeNS(null, "fill",this.fill);
+        this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
+        svg.appendChild(this.polygon);
+        return this;
+    }
+    pathd(){
+        var dtext=" M "+this.points[0][0]+","+this.points[0][1];
+        for(var i=0 ; i<this.points.length;i++){
+            dtext+= "L " +this.points[i][0]+","+this.points[i][1]+ " ";
+
+        }
+        if(this.close){
+            dtext+= "Z";
+        }
+        
+        return dtext;
+    }
+    rotate(angleX,angleY,angleZ){
+        //remove the old polygon
+        this.polygon.remove();
+        this.points = [];
+        for(var i=0;i<=360;i+=360/this.n){
+            var x = this.r*Math.cos(i*Math.PI/180);
+            var y = this.r*Math.sin(i*Math.PI/180);
+            var z= this.z;
+            var rot = rotater(angleX,angleY,angleZ,x*scale,y*scale,z*scale);
+            var rot_final = rotater(tx,ty,tz,rot[0],rot[1],rot[2]);
+            this.points.push([WIDTH/2+rot_final[0],HEIGHT/2+rot_final[1]]);
+        }
+        this.polygon = document.createElementNS("http://www.w3.org/2000/svg","path");
+        this.polygon.setAttributeNS(null, "d",this.pathd());    
+        this.polygon.setAttributeNS(null, "stroke", this.stroke);
+        this.polygon.setAttributeNS(null,"stroke-width",this.stroke_width);
+        this.polygon.setAttributeNS(null, "fill",this.fill);
+        this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
+        svg.appendChild(this.polygon);
+        return this;    
     }
 }
 
