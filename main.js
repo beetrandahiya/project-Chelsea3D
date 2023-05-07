@@ -3,7 +3,7 @@ var ty = 0;
 var tz = 0;
 
 var scale = 1;
-var scale_pers = 100;
+var scale_pers = 200;
 
 function rotater(angleX, angleY, angleZ, x, y, z) {
     var rot = math.multiply([
@@ -36,7 +36,7 @@ var fov = 90;
 var width = 600;
 var height = 600;
 
-var projection = "perspective";
+var projection = "perspective"; // "perspective" or "orthographic"
 var d = 95;
 
 // make a point element
@@ -63,7 +63,18 @@ class point3D {
 
             var proj = math.multiply(scale_pers, normproj).toArray();
         }
-        new point(WIDTH / 2 + proj[0], WIDTH / 2 + proj[1], stroke, stroke_width);
+
+        this.circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        this.circle.setAttributeNS(null, "cx", WIDTH / 2 + proj[0]);
+        this.circle.setAttributeNS(null, "cy", HEIGHT / 2 + proj[1]);
+        this.circle.setAttributeNS(null, "r", this.stroke_width);
+        this.circle.setAttributeNS(null, "stroke", this.stroke);
+        this.circle.setAttributeNS(null, "stroke-width", this.stroke_width);
+        this.avg_point =[this.x,this.y,this.z];
+        this.circle.setAttributeNS(null, "avg_point", '["'+this.x+'","'+this.y+'","'+this.z+'"]');
+        this.type = "point";
+        svg.appendChild(this.circle);
+        return this;
     }
 }
 
@@ -112,6 +123,9 @@ class line3D {
         this.line.setAttributeNS(null, "stroke-width", this.stroke_width);
         this.line.setAttributeNS(null, "stroke-dasharray", this.dasharray);
         this.line.setAttributeNS(null, "stroke-linecap", this.linecap);
+        this.avg_point = [(this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2, (this.z1 + this.z2) / 2];
+        this.line.setAttributeNS(null, "avg_point", '["'+this.avg_point[0]+'","'+this.avg_point[1]+'","'+this.avg_point[2]+'"]');
+        this.type = "line";
         svg.appendChild(this.line);
         return this;
     }
@@ -136,8 +150,19 @@ class circle3D {
             var x = r * Math.cos(i * Math.PI / 180);
             var y = r * Math.sin(i * Math.PI / 180);
             var z = this.z;
-            var rot = rotater(tx, ty, tz, x * scale, y * scale, z * scale);
-            this.points.push([WIDTH / 2 + rot[0], HEIGHT / 2 + rot[1]]);
+            var rot = rotater(tx, ty, tz, x, y , z );
+            if(projection == "orthographic"){
+                var proj = math.multiply(orthoproj, [rot[0], rot[1], rot[2]]);
+                var proj = math.multiply(scale, proj)
+            }
+            else if(projection == "perspective"){
+                var persproj = perspectiveProjectionMatrix(cameraPos, minDistance, maxDistance, fov, width, height);
+                var proj = math.multiply(persproj, [rot[0], rot[1], rot[2],1]);
+                var normproj = math.divide(proj, proj.get([3]));
+                var proj = math.multiply(scale_pers, normproj).toArray();
+            }
+
+            this.points.push([WIDTH / 2 + proj[0], HEIGHT / 2 + proj[1]]);
         }
         this.polygon = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this.polygon.setAttributeNS(null, "d", this.pathd());
@@ -145,6 +170,9 @@ class circle3D {
         this.polygon.setAttributeNS(null, "stroke-width", this.stroke_width);
         this.polygon.setAttributeNS(null, "fill", this.fill);
         this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
+        this.avg_point = [this.x, this.y, this.z];
+        this.polygon.setAttributeNS(null, "avg_point", '["'+this.x+'","'+this.y+'","'+this.z+'"]');
+        this.type = "circle";
         svg.appendChild(this.polygon);
         return this;
     }
@@ -168,9 +196,21 @@ class circle3D {
             var x = this.r * Math.cos(i * Math.PI / 180);
             var y = this.r * Math.sin(i * Math.PI / 180);
             var z = this.z;
-            var rot = rotater(angleX, angleY, angleZ, x * scale, y * scale, z * scale);
+            var rot = rotater(angleX, angleY, angleZ, x, y , z );
             var rot_final = rotater(tx, ty, tz, rot[0], rot[1], rot[2]);
-            this.points.push([WIDTH / 2 + rot_final[0], HEIGHT / 2 + rot_final[1]]);
+
+            if(projection == "orthographic"){
+                var proj = math.multiply(orthoproj, [rot_final[0], rot_final[1], rot_final[2]]);
+                var proj = math.multiply(scale, proj)
+            }
+            else if(projection == "perspective"){
+                var persproj = perspectiveProjectionMatrix(cameraPos, minDistance, maxDistance, fov, width, height);
+                var proj = math.multiply(persproj, [rot_final[0], rot_final[1], rot_final[2],1]);
+                var normproj = math.divide(proj, proj.get([3]));
+                var proj = math.multiply(scale_pers, normproj).toArray();
+            }
+
+            this.points.push([WIDTH / 2 + proj[0], HEIGHT / 2 + proj[1]]);
         }
         this.polygon = document.createElementNS("http://www.w3.org/2000/svg", "path");
         this.polygon.setAttributeNS(null, "d", this.pathd());
@@ -178,6 +218,9 @@ class circle3D {
         this.polygon.setAttributeNS(null, "stroke-width", this.stroke_width);
         this.polygon.setAttributeNS(null, "fill", this.fill);
         this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
+        this.avg_point = [this.x, this.y, this.z];
+        this.polygon.setAttributeNS(null, "avg_point", '["'+this.x+'","'+this.y+'","'+this.z+'"]');
+        this.type = "circle";
         svg.appendChild(this.polygon);
         return this;
     }
@@ -200,21 +243,56 @@ class polygon3D {
         this.polygon.setAttributeNS(null, "stroke-width", this.stroke_width);
         this.polygon.setAttributeNS(null, "fill", this.fill);
         this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
+        this.avg_point = [0, 0, 0];
+        for (var i = 0; i < this.points.length; i++) {
+            this.avg_point[0] += this.points[i][0];
+            this.avg_point[1] += this.points[i][1];
+            this.avg_point[2] += this.points[i][2];
+        }
+        this.avg_point[0] = this.avg_point[0] / this.points.length;
+        this.avg_point[1] = this.avg_point[1] / this.points.length;
+        this.avg_point[2] = this.avg_point[2] / this.points.length;
+        this.polygon.setAttributeNS(null, "avg_point", '["'+this.avg_point[0]+'","'+this.avg_point[1]+'","'+this.avg_point[2]+'"]');
+        this.type = "polygon";
         svg.appendChild(this.polygon);
         return this;
     }
     pathd() {
         var rot = rotater(tx, ty, tz, this.points[0][0] * scale, this.points[0][1] * scale, this.points[0][2] * scale);
-        var x1 = WIDTH / 2 + rot[0];
-        var y1 = HEIGHT / 2 + rot[1];
+        
+        if(projection == "orthographic"){
+            var proj = math.multiply(orthoproj, [rot[0], rot[1], rot[2]]);
+            var proj = math.multiply(scale, proj)
+        }
+        else if(projection == "perspective"){
+            var persproj = perspectiveProjectionMatrix(cameraPos, minDistance, maxDistance, fov, width, height);
+            var proj = math.multiply(persproj, [rot[0], rot[1], rot[2],1]);
+            var normproj = math.divide(proj, proj.get([3]));
+            var proj = math.multiply(scale_pers, normproj).toArray();
+        }
+
+        var x1 = WIDTH / 2 + proj[0];
+        var y1 = HEIGHT / 2 + proj[1];
+
         var dtext = " M " + x1 + "," + y1;
         for (var i = 0; i < this.points.length; i++) {
             //rotate the points
 
             var rot = rotater(tx, ty, tz, this.points[i][0] * scale, this.points[i][1] * scale, this.points[i][2] * scale);
 
-            var x = WIDTH / 2 + rot[0];
-            var y = HEIGHT / 2 + rot[1];
+            if(projection == "orthographic"){
+                var proj = math.multiply(orthoproj, [rot[0], rot[1], rot[2]]);
+                var proj = math.multiply(scale, proj)
+            }
+            else if(projection == "perspective"){
+                var persproj = perspectiveProjectionMatrix(cameraPos, minDistance, maxDistance, fov, width, height);
+                var proj = math.multiply(persproj, [rot[0], rot[1], rot[2],1]);
+                var normproj = math.divide(proj, proj.get([3]));
+                var proj = math.multiply(scale_pers, normproj).toArray();
+            }
+
+            var x = WIDTH / 2 + proj[0];
+            var y = HEIGHT / 2 + proj[1];
             dtext += "L " + x + "," + y + " ";
         }
         if (this.close) {
@@ -223,6 +301,13 @@ class polygon3D {
         return dtext;
     }
 }
+
+
+
+
+
+
+
 
 
 
@@ -374,3 +459,39 @@ function perspectiveProjectionMatrix(cameraPos, minDistance, maxDistance, fov, w
 }
 
 
+// order the elements in the array by their distance from the camera
+function orderElements() {
+    //get the svg elements
+    var elements = svg.children;
+    //sort the elements by their distance from the camera
+    var elements_sorted = [];
+    for (var i = 0; i < elements.length; i++) {
+        elements_sorted.push(elements[i]);
+    }
+    elements_sorted.sort(function (a, b) {
+        var a_avg = JSON.parse(a.getAttribute("avg_point"));
+        //convert string to a vector
+        a_avg = [parseFloat(a_avg[0]), parseFloat(a_avg[1]), parseFloat(a_avg[2])];
+        //convert to a vector
+        var a_vec = math.matrix([a_avg[0], a_avg[1], a_avg[2]]);
+        var b_avg = JSON.parse(b.getAttribute("avg_point"));
+        //convert string to a vector
+        b_avg = [parseFloat(b_avg[0]), parseFloat(b_avg[1]), parseFloat(b_avg[2])];
+        //convert to a vector
+        var b_vec = math.matrix([b_avg[0], b_avg[1], b_avg[2]]);
+        //get the distance from the camera
+        var dist_a = math.distance(a_vec, math.matrix(cameraPos));
+        var dist_b = math.distance(b_vec, math.matrix(cameraPos));
+        //move the element to the front of the array if it is closer to the camera
+        return dist_b - dist_a;
+    }
+    );
+    //remove the elements from the svg
+    for (var i = 0; i < elements.length; i++) {
+        elements[i].remove();
+    }
+    //add the elements back to the svg in the correct order
+    for (var i = 0; i < elements_sorted.length; i++) {
+        svg.appendChild(elements_sorted[i]);
+    }
+}
