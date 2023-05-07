@@ -5,23 +5,6 @@ var tz = 0;
 var scale = 1;
 var scale_pers = 200;
 
-function rotater(angleX, angleY, angleZ, x, y, z) {
-    var rot = math.multiply([
-        [1, 0, 0],
-        [0, Math.cos(angleX), -Math.sin(angleX)],
-        [0, Math.sin(angleX), Math.cos(angleX)]
-    ], [
-        [Math.cos(angleY), 0, Math.sin(angleY)],
-        [0, 1, 0],
-        [-Math.sin(angleY), 0, Math.cos(angleY)]
-    ], [
-        [Math.cos(angleZ), -Math.sin(angleZ), 0],
-        [Math.sin(angleZ), Math.cos(angleZ), 0],
-        [0, 0, 1]
-    ], [x, y, z])
-    return rot;
-}
-
 var orthoproj = [
     [1, 0, 0],
     [0, 1, 0],
@@ -415,6 +398,27 @@ function addMouseInteraction(elem) {
 
 
 
+//rotater
+
+function rotater(angleX, angleY, angleZ, x, y, z) {
+    var rot = math.multiply([
+        [1, 0, 0],
+        [0, Math.cos(angleX), -Math.sin(angleX)],
+        [0, Math.sin(angleX), Math.cos(angleX)]
+    ], [
+        [Math.cos(angleY), 0, Math.sin(angleY)],
+        [0, 1, 0],
+        [-Math.sin(angleY), 0, Math.cos(angleY)]
+    ], [
+        [Math.cos(angleZ), -Math.sin(angleZ), 0],
+        [Math.sin(angleZ), Math.cos(angleZ), 0],
+        [0, 0, 1]
+    ], [x, y, z])
+    return rot;
+}
+
+
+
 
 //////////////////////////////////////////////////////
 //////////////////////////////////////////////////////
@@ -479,11 +483,14 @@ function orderElements() {
         b_avg = [parseFloat(b_avg[0]), parseFloat(b_avg[1]), parseFloat(b_avg[2])];
         //convert to a vector
         var b_vec = math.matrix([b_avg[0], b_avg[1], b_avg[2]]);
-        //get the distance from the camera
-        var dist_a = math.distance(a_vec, math.matrix(cameraPos));
-        var dist_b = math.distance(b_vec, math.matrix(cameraPos));
+        //get the current camera position
+
+        cameraPos1 = rotater(tx, ty, tz, cameraPos[0], cameraPos[1], cameraPos[2]);
+
+        var dist_a = math.distance(a_vec, math.matrix(cameraPos1));
+        var dist_b = math.distance(b_vec, math.matrix(cameraPos1));
         //move the element to the front of the array if it is closer to the camera
-        return dist_b - dist_a;
+        return -dist_b + dist_a;
     }
     );
     //remove the elements from the svg
