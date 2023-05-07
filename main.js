@@ -73,15 +73,16 @@ class line3D {
 
 // make a circle element
 class circle3D {
-    constructor(x, y, z, r, n, stroke, stroke_width, fill) {
+    constructor(x, y, z, r, n, fill, fill_opacity, stroke, stroke_width) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.r = r;
         this.n = n;
+        this.fill = fill;
+        this.fill_opacity = fill_opacity;
         this.stroke = stroke;
         this.stroke_width = stroke_width;
-        this.fill = fill;
         
         //get the 4 points of the circle
         this.points = [];
@@ -135,6 +136,48 @@ class circle3D {
         return this;    
     }
 }
+
+
+// make a polygon element
+class polygon3D {
+    constructor(points, fill, fill_opacity, stroke, stroke_width, close=false) {
+        this.points = points;
+        this.fill = fill;
+        this.fill_opacity = fill_opacity;
+        this.stroke = stroke;
+        this.stroke_width = stroke_width;
+        this.close = close;
+
+        this.polygon = document.createElementNS("http://www.w3.org/2000/svg","path");
+        this.polygon.setAttributeNS(null, "d",this.pathd());
+        this.polygon.setAttributeNS(null, "stroke", this.stroke);
+        this.polygon.setAttributeNS(null,"stroke-width",this.stroke_width);
+        this.polygon.setAttributeNS(null, "fill",this.fill);
+        this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
+        svg.appendChild(this.polygon);
+        return this;
+    }
+    pathd(){
+        var rot = rotater(tx,ty,tz,this.points[0][0]*scale,this.points[0][1]*scale,this.points[0][2]*scale);
+        var x1=WIDTH/2+rot[0];
+        var y1=HEIGHT/2+rot[1];
+        var dtext=" M "+x1+","+y1;
+        for(var i=0 ; i<this.points.length;i++){
+            //rotate the points
+            var rot = rotater(tx,ty,tz,this.points[i][0]*scale,this.points[i][1]*scale,this.points[i][2]*scale);
+            var x=WIDTH/2+rot[0];
+            var y=HEIGHT/2+rot[1];
+            dtext+= "L " +x+","+y+ " "; 
+        }
+        if(this.close){
+            dtext+= "Z";
+        }
+        return dtext;
+    }
+}
+
+
+
 
 
 
@@ -193,7 +236,12 @@ elem.addEventListener("wheel", handleWheel, false);
 function handleWheel(e) {
     var delta = e.deltaY || e.detail || e.wheelDelta;
     if (delta > 0) {
-        scale = scale - zoomSpeed;
+        if(scale>0.1){
+            scale = scale - zoomSpeed;
+        }
+        else{
+            scale = 0.1;
+        }
     } else {
         scale = scale + zoomSpeed;    }
     e.preventDefault();
