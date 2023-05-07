@@ -22,14 +22,17 @@ var height = 600;
 var projection = "perspective"; // "perspective" or "orthographic"
 var d = 95;
 
+
 // make a point element
 class point3D {
-    constructor(x, y, z, stroke, stroke_width) {
+    constructor(x, y, z, fill, fill_opacity, stroke, stroke_width) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.stroke = stroke;
-        this.stroke_width = stroke_width;
+        this.stroke = stroke||"#000";
+        this.stroke_width = stroke_width||1;
+        this.fill = fill||"#000";
+        this.fill_opacity = fill_opacity||1;
 
         var rot = rotater(tx, ty, tz, x, y, z);
         if (projection == "orthographic") {
@@ -53,6 +56,8 @@ class point3D {
         this.circle.setAttributeNS(null, "r", this.stroke_width);
         this.circle.setAttributeNS(null, "stroke", this.stroke);
         this.circle.setAttributeNS(null, "stroke-width", this.stroke_width);
+        this.circle.setAttributeNS(null, "fill", this.fill);
+        this.circle.setAttributeNS(null, "fill-opacity", this.fill_opacity);
         this.avg_point =[this.x,this.y,this.z];
         this.circle.setAttributeNS(null, "avg_point", '["'+this.x+'","'+this.y+'","'+this.z+'"]');
         this.type = "point";
@@ -490,7 +495,7 @@ function orderElements() {
         var dist_a = math.distance(a_vec, math.matrix(cameraPos1));
         var dist_b = math.distance(b_vec, math.matrix(cameraPos1));
         //move the element to the front of the array if it is closer to the camera
-        return -dist_b + dist_a;
+        return dist_b - dist_a;
     }
     );
     //remove the elements from the svg
