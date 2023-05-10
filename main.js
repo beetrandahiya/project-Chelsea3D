@@ -365,7 +365,7 @@ function addMouseInteraction(elem) {
 
     // *** Mouse zoom. ***
     var zoomSpeed = 0.1;
-    var zoomSpeed_pers = 1;
+    var zoomSpeed_pers = 2.5;
     elem.addEventListener("wheel", handleWheel, false);
 
     function handleWheel(e) {

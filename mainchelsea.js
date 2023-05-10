@@ -43,7 +43,10 @@ function render() {
   z = z + dz;
 
   points.push([x*4,y*4,z*4]);
-  new polygon3D(points,"#f66",0,"#f66",1,false);
+  if(points.length>500){
+    points.shift();
+  }
+  new polygon3D(points,"#f66",0,"#f66",3,false);
   orderElements();
 
   requestAnimationFrame(render); //calls the function again to update the canavs every screen refresh
