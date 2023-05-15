@@ -47,8 +47,9 @@ function render() {
     points.shift();
   }
   new polygon3D(points,"#f66",0,"#f66",3,false);
-  orderElements();
 
+  
+  orderElements();
   requestAnimationFrame(render); //calls the function again to update the canavs every screen refresh
 };
 render();

@@ -19,7 +19,7 @@ var fov = 90;
 var width = 600;
 var height = 600;
 
-var projection = "perspective"; // "perspective" or "orthographic"
+var projection = "orthographic"; // "perspective" or "orthographic"
 var d = 95;
 
 
@@ -30,7 +30,7 @@ class point3D {
         this.y = y;
         this.z = z;
         this.stroke = stroke || "#000";
-        this.stroke_width = stroke_width || 1;
+        this.stroke_width = stroke_width * scale || 1;
         this.fill = fill || "#000";
         this.fill_opacity = fill_opacity || 1;
 
@@ -76,15 +76,13 @@ class line3D {
         this.y2 = y2;
         this.z2 = z2;
         this.stroke = stroke;
-        this.stroke_width = stroke_width;
+        this.stroke_width = stroke_width * scale;
         this.linecap = linecap;
         this.dasharray = dasharray;
 
         this.rot1 = rotater(tx, ty, tz, x1, y1, z1);
         this.rot2 = rotater(tx, ty, tz, x2, y2, z2);
 
-        console.log("line is from"+this.x1+","+this.y1+","+this.z1+" to "+this.x2+","+this.y2+","+this.z2);
-        var t0 = performance.now();
         if (projection == "orthographic") {
             var proj1 = math.multiply(orthoproj, [this.rot1[0], this.rot1[1], this.rot1[2]]);
             var proj1 = math.multiply(scale, proj1)
@@ -101,22 +99,17 @@ class line3D {
             var normproj2 = math.divide(proj2, proj2.get([3]));
             var proj2 = math.multiply(scale_pers, normproj2).toArray();
         }
-        var t1 = performance.now();
-        console.log("Call to calc line took " + (t1 - t0) + " milliseconds.");
 
-        var t0= performance.now();
         this.line = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        this.line.setAttributeNS(null,"d",`M ${WIDTH / 2 + proj1[0]},${HEIGHT / 2 + proj1[1]} L ${WIDTH / 2 + proj2[0]},${HEIGHT / 2 + proj2[1]}`);
+        this.line.setAttributeNS(null, "d", `M ${WIDTH / 2 + proj1[0]},${HEIGHT / 2 + proj1[1]} L ${WIDTH / 2 + proj2[0]},${HEIGHT / 2 + proj2[1]}`);
         this.line.setAttributeNS(null, "stroke", this.stroke);
         this.line.setAttributeNS(null, "stroke-width", this.stroke_width);
         this.line.setAttributeNS(null, "stroke-dasharray", this.dasharray);
         this.line.setAttributeNS(null, "stroke-linecap", this.linecap);
-        
-        this.line.setAttributeNS(null, "avg_point", (this.rot1[2]+this.rot2[2])/2);
+
+        this.line.setAttributeNS(null, "avg_point", (this.rot1[2] + this.rot2[2]) / 2);
         this.type = "line";
         svg.appendChild(this.line);
-        var t1= performance.now();
-        console.log("Call to make line took " + (t1 - t0) + " milliseconds.");
         return this;
 
     }
@@ -133,7 +126,7 @@ class circle3D {
         this.fill = fill;
         this.fill_opacity = fill_opacity;
         this.stroke = stroke;
-        this.stroke_width = stroke_width;
+        this.stroke_width = stroke_width * scale;
 
         //get the 4 points of the circle
         this.points = [];
@@ -159,7 +152,7 @@ class circle3D {
         this.polygon.setAttributeNS(null, "stroke", this.stroke);
         this.polygon.setAttributeNS(null, "stroke-width", this.stroke_width);
         this.polygon.setAttributeNS(null, "fill", this.fill);
-        this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);        
+        this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
         this.polygon.setAttributeNS(null, "avg_point", rot[2]);
         this.type = "circle";
         svg.appendChild(this.polygon);
@@ -222,7 +215,7 @@ class polygon3D {
         this.fill = fill;
         this.fill_opacity = fill_opacity;
         this.stroke = stroke;
-        this.stroke_width = stroke_width;
+        this.stroke_width = stroke_width * scale;
         this.close = close;
 
         this.polygon = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -288,6 +281,8 @@ class polygon3D {
         return dtext;
     }
 }
+
+// make a cube element
 
 
 
@@ -395,9 +390,67 @@ function addMouseInteraction(elem) {
 
         e.preventDefault();
     };
+    // *** END Mouse zoom. ***
 
+
+    //ctrl + mousemove to change to pan the view
+    /*
+        document.addEventListener("keydown", function (e) {
+            if (e.ctrlKey) {
+                elem.addEventListener("mousedown", handleMousedownPan, false);
+                elem.addEventListener("touchstart", handleMousedownPan, false);
+                document.addEventListener("mouseup", function (e) {
+                    if (mouseDown) mouseDown = false;
+                    elem.style.cursor = "grab";
+                }, false);
+                elem.addEventListener("mousemove", handleMovePan, false);
+                elem.addEventListener("touchmove", handleMovePan, false);
+
+
+
+            function handleMousedownPan(e) {
+                if (!mouseDown) mouseDown = true;
+                elem.style.cursor = "grabbing";
+                var x = parseInt(e.pageX) || parseInt(e.changedTouches[0].pageX);
+                var y = parseInt(e.pageY) || parseInt(e.changedTouches[0].pageY);
+                mouseX = x;
+                mouseY = y;
+                e.preventDefault();
+            };
+
+            function handleMovePan(e) { 
+                var sensetivity = 100; // how sensitive the mouse should be
+                // getting mouseX, mouseY, pmouseX and pmouseY.
+                pmouseX = mouseX;
+                pmouseY = mouseY;
+
+                var x = parseInt(e.pageX) || parseInt(e.changedTouches[0].pageX);
+                var y = parseInt(e.pageY) || parseInt(e.changedTouches[0].pageY);
+                if (Math.abs(x - pmouseX) >= 1) {
+                    mouseX = x;
+                } else {
+                    mouseX = pmouseX
+                }
+                if (Math.abs(y - pmouseY) >= 1) {
+                    mouseY = y;
+                } else {
+                    mouseY = pmouseY
+                }
+
+                console.log("panning")
+                //change position of the camera
+                if (mouseDown === true) {
+                    cameraPos[0] = cameraPos[0] + (mouseX - pmouseX) / sensetivity;
+                    cameraPos[1] = cameraPos[1] - (mouseY - pmouseY) / sensetivity;
+                }
+                e.preventDefault();
+                    }
+                }
+            }, false);
+            */
 
 }
+
 
 
 
@@ -419,6 +472,8 @@ function rotater(angleX, angleY, angleZ, x, y, z) {
     ], [x, y, z])
     return rot;
 }
+
+
 
 
 
@@ -479,7 +534,7 @@ function orderElements() {
         //sort according to the z value of the average point
         var a_avg_point = parseInt(a.getAttribute("avg_point"));
         var b_avg_point = parseInt(b.getAttribute("avg_point"));
-        return -b_avg_point +a_avg_point;
+        return -b_avg_point + a_avg_point;
     });
     //remove the elements from the svg
     for (var i = 0; i < elements.length; i++) {
@@ -488,5 +543,22 @@ function orderElements() {
     //add the elements back to the svg in the correct order
     for (var i = 0; i < elements_sorted.length; i++) {
         svg.appendChild(elements_sorted[i]);
+    }
+}
+
+
+// clear the canvas
+function setCanvas(elem) {
+    WIDTH = elem.clientWidth;
+    HEIGHT = elem.clientHeight;
+    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttributeNS(null, "width", WIDTH);
+    svg.setAttributeNS(null, "height", HEIGHT);
+    elem.appendChild(svg);
+}
+
+function clearCanvas() {
+    while (svg.firstChild) {
+        svg.removeChild(svg.lastChild);
     }
 }
