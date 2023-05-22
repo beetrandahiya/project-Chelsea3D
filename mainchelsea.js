@@ -48,7 +48,8 @@ function render() {
   }
   new polygon3D(points,"#f66",0,"#f66",3,false);
 
-  
+  new cube3D(0,0,0,100,100,100,"#f0f",0.1,"#f0f",3)
+  new line3D(0,0,0,100,0,0,"#f0f",3);
   orderElements();
   requestAnimationFrame(render); //calls the function again to update the canavs every screen refresh
 };

@@ -284,9 +284,71 @@ class polygon3D {
 
 // make a cube element
 
+class cube3D {
+    constructor(x,y,z,l,b,h,fill,fill_opacity,stroke,stroke_width){
+        // x, y, z are the top left corner of the cube\
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.l = l;
+        this.b = b;
+        this.h = h;
+        this.fill = fill;
+        this.fill_opacity = fill_opacity;
+        this.stroke = stroke;
+        this.stroke_width = stroke_width * scale;
 
+        this.points = [
+            [this.x,this.y,this.z],
+            [this.x+this.l,this.y,this.z],
+            [this.x+this.l,this.y+this.b,this.z],
+            [this.x,this.y+this.b,this.z],
+            [this.x,this.y,this.z+this.h],
+            [this.x+this.l,this.y,this.z+this.h],
+            [this.x+this.l,this.y+this.b,this.z+this.h],
+            [this.x,this.y+this.b,this.z+this.h]
+        ];
 
+        //make the lines
+        this.lines = [
+            [this.points[0],this.points[1]],
+            [this.points[1],this.points[2]],
+            [this.points[2],this.points[3]],
+            [this.points[3],this.points[0]],
+            [this.points[4],this.points[5]],
+            [this.points[5],this.points[6]],
+            [this.points[6],this.points[7]],
+            [this.points[7],this.points[4]],
+            [this.points[0],this.points[4]],
+            [this.points[1],this.points[5]],
+            [this.points[2],this.points[6]],
+            [this.points[3],this.points[7]]
+        ];
 
+        //make the faces
+        this.faces = [
+            [this.points[0],this.points[1],this.points[2],this.points[3]],
+            [this.points[4],this.points[5],this.points[6],this.points[7]],
+            [this.points[0],this.points[1],this.points[5],this.points[4]],
+            [this.points[1],this.points[2],this.points[6],this.points[5]],
+            [this.points[2],this.points[3],this.points[7],this.points[6]],
+            [this.points[3],this.points[0],this.points[4],this.points[7]]
+        ];
+
+        //make the polygons
+        this.polygons = [];
+        for(var i=0;i<this.faces.length;i++){
+            this.polygons.push(new polygon3D(this.faces[i],this.fill,this.fill_opacity,'#0000',this.stroke_width,true));
+        }
+
+        //make the lines
+        for(var i=0;i<this.lines.length;i++){
+            new line3D(this.lines[i][0][0],this.lines[i][0][1],this.lines[i][0][2],this.lines[i][1][0],this.lines[i][1][1],this.lines[i][1][2],this.stroke,this.stroke_width,'butt','');
+        }
+
+        this.type = "cube";
+    }
+}
 
 
 
