@@ -23,3 +23,8 @@ h1{
     cursor: grab;
     border: 2px solid #aaa;
 }
+
+
+svg{
+    shape-rendering:geometricPrecision;
+}

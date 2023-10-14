@@ -39,7 +39,6 @@ class point3D {
             var proj = math.multiply(orthoproj, [rot[0], rot[1], rot[2]]);
             var proj = math.multiply(scale, proj)
         } else if (projection == "perspective") {
-
             //make a perspective projection matrix with camera at (300,300,300) 
             var persproj = perspectiveProjectionMatrix(cameraPos, minDistance, maxDistance, fov, width, height);
             // Apply the perspective transformation
@@ -68,7 +67,7 @@ class point3D {
 
 // make a line element
 class line3D {
-    constructor(x1, y1, z1, x2, y2, z2, stroke, stroke_width, linecap = "butt", dasharray = "") {
+    constructor(x1, y1, z1, x2, y2, z2, stroke, stroke_width, linecap = "rounded", dasharray = "") {
         this.x1 = x1;
         this.y1 = y1;
         this.z1 = z1;
@@ -210,7 +209,7 @@ class circle3D {
 
 // make a polygon element
 class polygon3D {
-    constructor(points, fill, fill_opacity, stroke, stroke_width, close = false) {
+    constructor(points, fill, fill_opacity, stroke, stroke_width, close = false, linecap = "rounded", linejoin = "round") {
         this.points = points;
         this.fill = fill;
         this.fill_opacity = fill_opacity;
@@ -224,6 +223,8 @@ class polygon3D {
         this.polygon.setAttributeNS(null, "stroke-width", this.stroke_width);
         this.polygon.setAttributeNS(null, "fill", this.fill);
         this.polygon.setAttributeNS(null, "fill-opacity", this.fill_opacity);
+        this.polygon.setAttributeNS(null, "stroke-linecap", linecap);
+        this.polygon.setAttributeNS(null, "stroke-linejoin", linejoin);
         this.avg_point = [0, 0, 0];
         for (var i = 0; i < this.points.length; i++) {
             this.avg_point[0] += this.points[i][0];
@@ -285,7 +286,7 @@ class polygon3D {
 // make a cube element
 
 class cube3D {
-    constructor(x,y,z,l,b,h,fill,fill_opacity,stroke,stroke_width){
+    constructor(x, y, z, l, b, h, fill, fill_opacity, stroke, stroke_width) {
         // x, y, z are the top left corner of the cube\
         this.x = x;
         this.y = y;
@@ -299,51 +300,51 @@ class cube3D {
         this.stroke_width = stroke_width * scale;
 
         this.points = [
-            [this.x,this.y,this.z],
-            [this.x+this.l,this.y,this.z],
-            [this.x+this.l,this.y+this.b,this.z],
-            [this.x,this.y+this.b,this.z],
-            [this.x,this.y,this.z+this.h],
-            [this.x+this.l,this.y,this.z+this.h],
-            [this.x+this.l,this.y+this.b,this.z+this.h],
-            [this.x,this.y+this.b,this.z+this.h]
+            [this.x, this.y, this.z],
+            [this.x + this.l, this.y, this.z],
+            [this.x + this.l, this.y + this.b, this.z],
+            [this.x, this.y + this.b, this.z],
+            [this.x, this.y, this.z + this.h],
+            [this.x + this.l, this.y, this.z + this.h],
+            [this.x + this.l, this.y + this.b, this.z + this.h],
+            [this.x, this.y + this.b, this.z + this.h]
         ];
 
         //make the lines
         this.lines = [
-            [this.points[0],this.points[1]],
-            [this.points[1],this.points[2]],
-            [this.points[2],this.points[3]],
-            [this.points[3],this.points[0]],
-            [this.points[4],this.points[5]],
-            [this.points[5],this.points[6]],
-            [this.points[6],this.points[7]],
-            [this.points[7],this.points[4]],
-            [this.points[0],this.points[4]],
-            [this.points[1],this.points[5]],
-            [this.points[2],this.points[6]],
-            [this.points[3],this.points[7]]
+            [this.points[0], this.points[1]],
+            [this.points[1], this.points[2]],
+            [this.points[2], this.points[3]],
+            [this.points[3], this.points[0]],
+            [this.points[4], this.points[5]],
+            [this.points[5], this.points[6]],
+            [this.points[6], this.points[7]],
+            [this.points[7], this.points[4]],
+            [this.points[0], this.points[4]],
+            [this.points[1], this.points[5]],
+            [this.points[2], this.points[6]],
+            [this.points[3], this.points[7]]
         ];
 
         //make the faces
         this.faces = [
-            [this.points[0],this.points[1],this.points[2],this.points[3]],
-            [this.points[4],this.points[5],this.points[6],this.points[7]],
-            [this.points[0],this.points[1],this.points[5],this.points[4]],
-            [this.points[1],this.points[2],this.points[6],this.points[5]],
-            [this.points[2],this.points[3],this.points[7],this.points[6]],
-            [this.points[3],this.points[0],this.points[4],this.points[7]]
+            [this.points[0], this.points[1], this.points[2], this.points[3]],
+            [this.points[4], this.points[5], this.points[6], this.points[7]],
+            [this.points[0], this.points[1], this.points[5], this.points[4]],
+            [this.points[1], this.points[2], this.points[6], this.points[5]],
+            [this.points[2], this.points[3], this.points[7], this.points[6]],
+            [this.points[3], this.points[0], this.points[4], this.points[7]]
         ];
 
         //make the polygons
         this.polygons = [];
-        for(var i=0;i<this.faces.length;i++){
-            this.polygons.push(new polygon3D(this.faces[i],this.fill,this.fill_opacity,'#0000',this.stroke_width,true));
+        for (var i = 0; i < this.faces.length; i++) {
+            this.polygons.push(new polygon3D(this.faces[i], this.fill, this.fill_opacity, this.stroke, this.stroke_width, true));
         }
 
         //make the lines
-        for(var i=0;i<this.lines.length;i++){
-            new line3D(this.lines[i][0][0],this.lines[i][0][1],this.lines[i][0][2],this.lines[i][1][0],this.lines[i][1][1],this.lines[i][1][2],this.stroke,this.stroke_width,'butt','');
+         for(var i=0;i<this.lines.length;i++){
+            new line3D(this.lines[i][0][0],this.lines[i][0][1],this.lines[i][0][2],this.lines[i][1][0],this.lines[i][1][1],this.lines[i][1][2],this.stroke,this.stroke_width,"round");
         }
 
         this.type = "cube";
@@ -352,7 +353,132 @@ class cube3D {
 
 
 
+class Sphere3D {
+    constructor(x, y, z, r, n, fill, fill_opacity, stroke, stroke_width) {
+        //generate an icosphere 
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.r = r;
+        this.n = n;
+        this.fill = fill;
+        this.fill_opacity = fill_opacity;
+        this.stroke = stroke;
+        this.stroke_width = stroke_width * scale;
 
+        this.points = [];
+        this.faces = [];
+
+        //make the 12 vertices of the icosahedron
+        var phi = (1 + Math.sqrt(5)) / 2;
+        const t = (1.0 + Math.sqrt(5.0)) / 2.0;
+
+
+        this.vertices = [
+            [-1, t, 0],
+            [1, t, 0],
+            [-1, -t, 0],
+            [1, -t, 0],
+            [0, -1, t],
+            [0, 1, t],
+            [0, -1, -t],
+            [0, 1, -t],
+            [t, 0, -1],
+            [t, 0, 1],
+            [-t, 0, -1],
+            [-t, 0, 1],
+        ];
+
+        //make the 20 faces of the icosahedron
+        this.faces = [
+            [0, 11, 5],
+            [0, 5, 1],
+            [0, 1, 7],
+            [0, 7, 10],
+            [0, 10, 11],
+            [1, 5, 9],
+            [5, 11, 4],
+            [11, 10, 2],
+            [10, 7, 6],
+            [7, 1, 8],
+            [3, 9, 4],
+            [3, 4, 2],
+            [3, 2, 6],
+            [3, 6, 8],
+            [3, 8, 9],
+            [4, 9, 5],
+            [2, 4, 11],
+            [6, 2, 10],
+            [8, 6, 7],
+            [9, 8, 1],
+        ]
+
+
+        //make the icosahedron
+
+        //subdivide the faces
+        for (var i = 0; i < this.n; i++) {
+            var faces2 = [];
+            for (var j = 0; j < this.faces.length; j++) {
+                var p1 = this.vertices[this.faces[j][0]];
+                var p2 = this.vertices[this.faces[j][1]];
+                var p3 = this.vertices[this.faces[j][2]];
+
+                //find the midpoints
+                var p12 = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2];
+                var p23 = [(p2[0] + p3[0]) / 2, (p2[1] + p3[1]) / 2, (p2[2] + p3[2]) / 2];
+                var p31 = [(p3[0] + p1[0]) / 2, (p3[1] + p1[1]) / 2, (p3[2] + p1[2]) / 2];
+
+                //normalize the midpoints
+                var p12 = normalize(p12);
+                var p23 = normalize(p23);
+                var p31 = normalize(p31);
+                
+                //add the new points to the vertices
+                this.vertices.push(p12);
+                this.vertices.push(p23);
+                this.vertices.push(p31);
+
+                //add the new faces
+                var ind1 = this.vertices.length - 3;
+                var ind2 = this.vertices.length - 2;
+                var ind3 = this.vertices.length - 1;
+
+                faces2.push([this.faces[j][0], ind1, ind3]);
+                faces2.push([this.faces[j][1], ind2, ind1]);
+                faces2.push([this.faces[j][2], ind3, ind2]);
+                faces2.push([ind1, ind2, ind3]);
+            }
+        this.faces = faces2;
+    }
+        //normalize the vertices
+        for (var i = 0; i < this.vertices.length; i++) {
+            this.vertices[i] = normalize(this.vertices[i]);
+        }
+
+        for (var i = 0; i < this.faces.length; i++) {
+            var p1 = this.vertices[this.faces[i][0]];
+            var p2 = this.vertices[this.faces[i][1]];
+            var p3 = this.vertices[this.faces[i][2]];
+
+            var p1 = [p1[0] * this.r + this.x, p1[1] * this.r + this.y, p1[2] * this.r + this.z];
+            var p2 = [p2[0] * this.r + this.x, p2[1] * this.r + this.y, p2[2] * this.r + this.z];
+            var p3 = [p3[0] * this.r + this.x, p3[1] * this.r + this.y, p3[2] * this.r + this.z];
+
+            this.points.push(p1);
+            this.points.push(p2);
+            this.points.push(p3);
+
+            //make the icosahedron
+            new polygon3D([p1, p2, p3], this.fill, this.fill_opacity, this.stroke, this.stroke_width, true);
+        }
+    }
+};
+
+function normalize(v) {
+    var mag = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    return [v[0] / mag, v[1] / mag, v[2] / mag];
+}
 
 
 
@@ -422,7 +548,7 @@ function addMouseInteraction(elem) {
 
     // *** Mouse zoom. ***
     var zoomSpeed = 0.1;
-    var zoomSpeed_pers = 2.5;
+    var zoomSpeed_pers = 10;
     elem.addEventListener("wheel", handleWheel, false);
 
     function handleWheel(e) {
@@ -606,6 +732,7 @@ function orderElements() {
     for (var i = 0; i < elements_sorted.length; i++) {
         svg.appendChild(elements_sorted[i]);
     }
+
 }
 
 
@@ -624,3 +751,73 @@ function clearCanvas() {
         svg.removeChild(svg.lastChild);
     }
 }
+
+
+
+// create gradient element for stroke
+
+function createGradient(id, colors) {
+    var grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    grad.setAttributeNS(null, "id", id);
+    for (var i = 0; i < colors.length; i++) {
+        var stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop.setAttributeNS(null, "offset", colors[i][0]);
+        stop.setAttributeNS(null, "stop-color", colors[i][1]);
+        grad.appendChild(stop);
+    }
+    svg.appendChild(grad);
+    return grad;
+}
+
+
+function interpolateColor(color1, color2, steps) {
+    // Parse the color strings and extract the RGB components
+    const rgb1 = hexToRgb(color1);
+    const rgb2 = hexToRgb(color2);
+
+    // Calculate the step size for each color component
+    const stepSize = {
+        r: (rgb2.r - rgb1.r) / steps,
+        g: (rgb2.g - rgb1.g) / steps,
+        b: (rgb2.b - rgb1.b) / steps
+    };
+
+    // Initialize an array to store the interpolated colors
+    const interpolatedColors = [];
+
+    // Generate the interpolated colors
+    for (let i = 0; i <= steps; i++) {
+        const r = Math.round(rgb1.r + stepSize.r * i);
+        const g = Math.round(rgb1.g + stepSize.g * i);
+        const b = Math.round(rgb1.b + stepSize.b * i);
+
+        interpolatedColors.push(rgbToHex(r, g, b));
+    }
+
+    return interpolatedColors;
+}
+
+function hexToRgb(hex) {
+    hex = hex.replace(/^#/, '');
+    const bigint = parseInt(hex, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return {
+        r,
+        g,
+        b
+    };
+}
+
+function rgbToHex(r, g, b) {
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+const color1 = "#FF0000"; // Red
+const color2 = "#0000FF"; // Blue
+const steps = 5; // Number of colors in between
+
+const interpolatedColors = interpolateColor(color1, color2, steps);
+
+console.log(interpolatedColors);
